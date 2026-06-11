@@ -238,13 +238,15 @@
     <h1>Artificial Intelligence 101</h1>
     <p class="sub">Built for social-protection teams who are new to AI and will go on to shape their own programs. Explore each tab at your own pace.</p>
     <nav>
-      <button class="pill active" data-target="c-circles">The Big Picture</button>
+      <button class="pill active" data-target="c-note">Concept Note</button>
+      <button class="pill" data-target="c-circles">The Big Picture</button>
       <button class="pill" data-target="c-learn">How It Learns</button>
       <button class="pill" data-target="c-triad">Three Ingredients</button>
       <button class="pill" data-target="c-history">History</button>
       <button class="pill" data-target="c-scale">Hardware &amp; Scale</button>
       <button class="pill" data-target="c-predict">Prediction</button>
       <button class="pill" data-target="c-transformer">The Transformer</button>
+      <button class="pill" data-target="c-llm">LLMs</button>
       <button class="pill" data-target="c-agent">Agentic AI</button>
       <button class="pill" data-target="c-terms">Key Terms</button>
       <button class="pill" data-target="c-myths">Myths &amp; Limits</button>
@@ -254,8 +256,28 @@
     </nav>
   </header>
 
+  <!-- CONCEPT NOTE -->
+  <section class="chapter active" id="c-note">
+    <h2>Concept note: the whole picture, in order</h2>
+    <p class="lead">A one-page map of this guide. The ideas are laid out in the order they build on each other. Read it to get your bearings, then open any tab to go deeper.</p>
+    <p class="lead" style="margin-top:12px">In one line: artificial intelligence is the effort to get computers to do tasks that usually need human thinking. Here is how the pieces fit.</p>
+    <div class="fw">
+      <div class="fwstep"><div class="n"></div><div><h4>What AI is</h4><p>A set of nested ideas. Inside artificial intelligence sits machine learning, inside that deep learning, and at the center generative AI. See The Big Picture.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>What it is made of</h4><p>Three ingredients working together: data, compute, and algorithms. Remove any one and nothing works. See Three Ingredients.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>How it learns</h4><p>You give it examples with the right answers, and it works out the rules on its own. See How It Learns.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Why it took off now</h4><p>The transistor made computing cheap, and scaling laws showed that more data and compute reliably buy more capability. See History and Hardware and Scale.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>How generative AI works</h4><p>It builds an answer one small piece at a time, predicting the next likely piece and repeating. See Prediction.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>The engine inside it</h4><p>The Transformer, whose key trick is attention: every word looks at the others to decide what matters. See The Transformer.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>The model you actually use</h4><p>Train that engine on huge amounts of text and you get a large language model, or LLM, the thing behind chatbots. See LLMs.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>From answering to doing</h4><p>Wrap an LLM with planning, memory, tools, and knowledge, and it becomes an agent that carries out tasks. See Agentic AI.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>The limits</h4><p>It can be confidently wrong, it can carry bias, and its reasoning can be hidden. See Myths and Limits.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Using it responsibly</h4><p>In social protection, keep a person in charge, stay transparent, and pilot before you scale. See For Social Protection.</p></div></div>
+    </div>
+    <div class="note"><b>How to use this guide.</b> The tabs follow this same order. You can move straight through, or jump to whatever you need. The Key Terms tab is your dictionary, and the Quiz lets you check what stuck.</div>
+  </section>
+
   <!-- CIRCLES -->
-  <section class="chapter active" id="c-circles">
+  <section class="chapter" id="c-circles">
     <h2>From AI to Generative AI</h2>
     <p class="lead">These four ideas sit inside one another. Watch them nest from the outside in, then click any ring to read about it.</p>
     <div class="circle-stage">
@@ -461,6 +483,33 @@
     <p class="flabel">Then it adds that word and runs the loop again. Two strengths made it a turning point: it understands context across a whole passage, and it reads all the words at once, which makes training on huge amounts of text possible.</p>
   </section>
 
+  <!-- LLM -->
+  <section class="chapter" id="c-llm">
+    <h2>Large language models (LLMs)</h2>
+    <p class="lead">You have seen the engine, the Transformer. Train that engine on an enormous amount of text and you get a large language model, usually shortened to LLM. This is the thing you actually chat with.</p>
+
+    <div class="flow">
+      <div class="fbox">The Transformer<small>the engine</small></div>
+      <div class="farrow">+</div>
+      <div class="fbox">Huge amounts of text</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">Training</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox good">LLM</div>
+    </div>
+    <p class="flabel">The result powers chatbots and the agents in the next tab.</p>
+
+    <h2 style="font-size:20px;margin-top:26px">What the three letters mean</h2>
+    <div class="cols">
+      <div class="ucard"><h4>Large</h4><p>Billions of internal settings, trained on a vast amount of text. Bigger has tended to mean more capable.</p></div>
+      <div class="ucard"><h4>Language</h4><p>It works with words. It reads text and writes text, across many languages.</p></div>
+      <div class="ucard"><h4>Model</h4><p>The finished, trained system. The thing you send a prompt to and get a reply from.</p></div>
+    </div>
+
+    <div class="note"><b>How it works, in one line.</b> An LLM does the next-piece prediction you saw in the Prediction tab, at a massive scale. ChatGPT, Claude, and Gemini are all LLMs.</div>
+    <div class="note"><b>Where it fits.</b> On its own, an LLM answers questions. Give it memory, tools, and the ability to plan, and the same LLM becomes the reasoning core of an agent. That is the step covered in Agentic AI.</div>
+  </section>
+
   <!-- AGENTIC AI -->
   <section class="chapter" id="c-agent">
     <h2>Agentic AI: from answering to doing</h2>
@@ -499,12 +548,12 @@
         <circle cx="410" cy="300" r="40" fill="rgba(251,113,133,.2)" stroke="#FB7185" stroke-width="2.5"/>
         <text x="410" y="305" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Tools</text>
         <circle cx="300" cy="222" r="54" fill="rgba(99,102,241,.28)" stroke="#6366F1" stroke-width="3"/>
-        <text x="300" y="218" text-anchor="middle" font-size="14" font-weight="800" fill="#fff" font-family="Sora,sans-serif">Reasoning</text>
-        <text x="300" y="234" text-anchor="middle" font-size="11.5" fill="#c7cbff" font-family="Inter">core (model)</text>
+        <text x="300" y="218" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="Sora,sans-serif">LLM</text>
+        <text x="300" y="234" text-anchor="middle" font-size="10.5" fill="#c7cbff" font-family="Inter">reasoning core</text>
       </svg>
     </div>
     <div class="cols" style="margin-top:14px">
-      <div class="ucard"><h4><span class="ic">🧠</span> Reasoning core</h4><p>The model at the center that decides what to do at each step.</p></div>
+      <div class="ucard"><h4><span class="ic">🧠</span> Reasoning core (the LLM)</h4><p>The large language model at the center that decides what to do at each step.</p></div>
       <div class="ucard"><h4><span class="ic">🗺️</span> Planning</h4><p>Breaks the goal into an ordered set of steps before acting.</p></div>
       <div class="ucard"><h4><span class="ic">💾</span> Memory</h4><p>Keeps track of what has happened and what it learned, within a task and sometimes across tasks.</p></div>
       <div class="ucard"><h4><span class="ic">📚</span> Knowledge (RAG)</h4><p>Looks up trusted information from a connected source before it answers.</p></div>
