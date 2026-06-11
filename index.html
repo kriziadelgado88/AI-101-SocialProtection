@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 101 for Public Officials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1027;--bg2:#141738;--surface:#1B1F44;--surface-2:#232a5c;--line:#2C3262;
+    --text:#ECEEFA;--muted:#9AA0CF;
+    --ai:#6366F1;--ml:#22D3EE;--dl:#F5A524;--gen:#FB7185;--good:#34D399;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.30;z-index:0;pointer-events:none}
+  .blob.a{width:420px;height:420px;background:var(--ai);top:-120px;left:-100px}
+  .blob.b{width:380px;height:380px;background:var(--gen);bottom:-140px;right:-110px}
+  .blob.c{width:300px;height:300px;background:var(--ml);top:42%;right:-120px;opacity:.16}
+  @media (prefers-reduced-motion:no-preference){
+    .blob{animation:drift 20s ease-in-out infinite alternate}
+    .blob.b{animation-duration:24s}.blob.c{animation-duration:28s}
+    @keyframes drift{to{transform:translate(40px,-30px) scale(1.1)}}
+  }
+  .shell{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 22px 80px}
+  header{padding:50px 0 22px;text-align:center}
+  .kicker{font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ml);font-weight:600;margin:0 0 14px}
+  h1{font-family:"Sora",sans-serif;font-weight:800;font-size:clamp(34px,6.4vw,58px);line-height:1.03;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:clamp(15px,2.2vw,18px);margin:16px auto 0;max-width:58ch}
+  nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:30px 0 6px}
+  .pill{font-family:"Sora",sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;background:var(--surface);color:var(--muted);border:1px solid var(--line);padding:9px 15px;border-radius:999px;transition:all .2s ease}
+  .pill:hover{color:var(--text);border-color:#3a4288}
+  .pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .chapter{display:none;animation:fade .5s ease both}
+  .chapter.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  h2{font-family:"Sora",sans-serif;font-weight:700;font-size:clamp(23px,3.8vw,31px);margin:28px 0 10px;letter-spacing:-.01em}
+  .lead{color:var(--muted);font-size:16.5px;max-width:64ch;margin:0 0 8px}
+  .btn{font-family:"Sora",sans-serif;font-weight:600;font-size:14px;cursor:pointer;border-radius:11px;padding:10px 16px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);transition:all .18s ease}
+  .btn:hover{border-color:#4a52a0;transform:translateY(-1px)}
+  .btn.primary{background:var(--ai);border-color:var(--ai);color:#fff}
+  .controls{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .hint{color:var(--muted);font-size:13.5px;margin-top:12px}
+  .note{background:linear-gradient(180deg,var(--surface),#171b3e);border:1px solid var(--line);border-left:3px solid var(--dl);border-radius:12px;padding:16px 18px;margin-top:20px;color:var(--muted);font-size:15px}
+  .note b{color:var(--text);font-weight:600;font-family:"Sora",sans-serif}
+  .note.warn{border-left-color:var(--gen)}
+  .note.good{border-left-color:var(--good)}
+
+  /* circles */
+  .circle-stage{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;align-items:center;margin-top:18px}
+  @media (max-width:680px){.circle-stage{grid-template-columns:1fr}}
+  .ringbox{background:radial-gradient(circle at 50% 45%,#171b40,#0d1030);border:1px solid var(--line);border-radius:20px;padding:14px}
+  .ring{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(.2);transition:opacity .6s ease, transform .7s cubic-bezier(.18,.9,.3,1.2)}
+  .ring.show{opacity:1;transform:scale(1)}
+  .ring-hit{cursor:pointer}
+  .ring.pulse{animation:pulse 1.1s ease}
+  @keyframes pulse{50%{filter:drop-shadow(0 0 14px currentColor)}}
+  .rlabel{font-family:"Sora",sans-serif;font-weight:700;fill:#fff;opacity:0;transition:opacity .5s ease .25s}
+  .rlabel.show{opacity:1}
+  .desc{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;min-height:170px}
+  .desc .tag{display:inline-block;font-family:"Sora",sans-serif;font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px;margin-bottom:12px}
+  .desc h3{font-family:"Sora",sans-serif;margin:0 0 8px;font-size:20px}
+  .desc p{margin:0;color:var(--muted);font-size:15.5px}
+
+  /* timeline */
+  .timeline{position:relative;margin:26px 0 0;padding-left:28px}
+  .timeline:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--ai),var(--ml),var(--dl),var(--gen))}
+  .tl{position:relative;padding:0 0 22px 18px}
+  .tl:before{content:"";position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--ml)}
+  .tl .yr{font-family:"Sora",sans-serif;font-weight:700;font-size:15px;color:var(--ml)}
+  .tl h4{font-family:"Sora",sans-serif;margin:2px 0 4px;font-size:16.5px}
+  .tl p{margin:0;color:var(--muted);font-size:14.5px}
+  .tl.k:before{border-color:var(--gen)}
+  .tl.k .yr{color:var(--gen)}
+
+  /* scaling interactive */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:18px}
+  .chartwrap{background:radial-gradient(circle at 30% 20%,#171b40,#0d1030);border:1px solid var(--line);border-radius:14px;padding:10px}
+  .readouts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+  @media (max-width:560px){.readouts{grid-template-columns:1fr}}
+  .ro{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .ro .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .ro .v{font-family:"Sora",sans-serif;font-weight:700;font-size:21px;margin-top:3px}
+  input[type=range]{width:100%;margin-top:16px;accent-color:var(--ml)}
+
+  /* prediction */
+  .seedrow{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 14px}
+  .seed{font-size:13.5px;font-weight:600;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:10px;transition:all .18s ease}
+  .seed:hover{color:var(--text)}
+  .seed.active{background:var(--ml);border-color:var(--ml);color:#08283b}
+  .sentence{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;font-size:clamp(19px,3.2vw,25px);font-family:"Sora",sans-serif;font-weight:600;line-height:1.45;min-height:78px}
+  .sentence .added{color:var(--ml)}
+  .sentence .fresh{animation:pop .45s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .caret{display:inline-block;width:3px;height:1.05em;background:var(--gen);vertical-align:-3px;margin-left:4px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .bars{margin-top:18px;display:flex;flex-direction:column;gap:9px}
+  .bartitle{color:var(--muted);font-size:13.5px;margin:4px 0 2px}
+  .bar{display:grid;grid-template-columns:120px 1fr 52px;align-items:center;gap:12px;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;transition:all .16s ease}
+  .bar:hover{border-color:var(--ml);transform:translateX(3px)}
+  .bar .w{font-family:"Sora",sans-serif;font-weight:600;font-size:15px}
+  .bar .track{height:12px;background:#11142f;border-radius:999px;overflow:hidden}
+  .bar .fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--ai),var(--ml));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+  .bar.top .fill{background:linear-gradient(90deg,var(--dl),var(--gen))}
+  .bar .pct{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
+  .topbadge{font-size:10.5px;font-weight:700;color:var(--gen);margin-left:6px;letter-spacing:.04em}
+  .donebox{margin-top:16px;background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;padding:14px 16px;color:var(--muted);font-size:14.5px;display:none}
+  .donebox.show{display:block}
+
+  /* terms */
+  .terms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  @media (max-width:680px){.terms{grid-template-columns:1fr 1fr}}
+  @media (max-width:460px){.terms{grid-template-columns:1fr}}
+  .term{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;transition:all .2s ease}
+  .term:hover{transform:translateY(-4px);border-color:#454da0;box-shadow:0 14px 34px rgba(0,0,0,.3)}
+  .term svg{width:40px;height:40px;margin-bottom:12px;display:block}
+  .term h4{font-family:"Sora",sans-serif;font-size:16px;margin:0 0 6px}
+  .term p{margin:0;color:var(--muted);font-size:13.8px;line-height:1.55}
+  .termgroup{font-family:"Sora",sans-serif;font-weight:700;font-size:12.5px;color:var(--ml);letter-spacing:.12em;text-transform:uppercase;margin:26px 2px 0}
+
+  /* two-col cards */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  @media (max-width:640px){.cols{grid-template-columns:1fr}}
+  .ucard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .ucard h4{font-family:"Sora",sans-serif;margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .ucard p{margin:0;color:var(--muted);font-size:14px}
+  .ucard .ic{font-size:18px}
+
+  /* framework steps */
+  .fw{counter-reset:s;margin-top:18px}
+  .fwstep{display:flex;gap:15px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+  .fwstep .n{counter-increment:s;flex:0 0 34px;height:34px;border-radius:10px;background:var(--ai);color:#fff;font-family:"Sora",sans-serif;font-weight:700;display:grid;place-items:center}
+  .fwstep .n:after{content:counter(s)}
+  .fwstep h4{font-family:"Sora",sans-serif;margin:3px 0 4px;font-size:16px}
+  .fwstep p{margin:0;color:var(--muted);font-size:14.3px}
+
+  /* chatbot */
+  .chat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:18px;display:flex;flex-direction:column;height:460px}
+  .msgs{flex:1;overflow-y:auto;padding:6px 6px 2px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:84%;padding:11px 14px;border-radius:14px;font-size:14.5px;line-height:1.55;white-space:pre-wrap}
+  .msg.u{align-self:flex-end;background:var(--ai);color:#fff;border-bottom-right-radius:4px}
+  .msg.a{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg.a.err{border-color:var(--gen);color:#ffc6cf}
+  .typing{display:inline-flex;gap:4px;align-items:center}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;animation:bob 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes bob{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 2px 0}
+  .chip{font-size:12.5px;cursor:pointer;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:999px;transition:all .16s ease}
+  .chip:hover{color:var(--text);border-color:var(--ml)}
+  .inputrow{display:flex;gap:9px;margin-top:10px}
+  .inputrow textarea{flex:1;resize:none;background:var(--bg2);border:1px solid var(--line);border-radius:12px;color:var(--text);font-family:inherit;font-size:14.5px;padding:11px 13px;height:46px;line-height:1.4}
+  .inputrow textarea:focus{outline:none;border-color:var(--ml)}
+
+  /* simple flow diagrams */
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0 4px}
+  .fbox{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px 14px;font-family:"Sora",sans-serif;font-weight:600;font-size:13.5px;text-align:center;min-width:92px;line-height:1.25}
+  .fbox small{display:block;font-family:"Inter",sans-serif;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:3px}
+  .fbox.hl{border-color:var(--ml);color:#bff3fb}
+  .fbox.good{border-color:var(--good);color:#a9f3d6}
+  .farrow{color:var(--muted);font-size:20px;flex:0 0 auto}
+  .flabel{text-align:center;color:var(--muted);font-size:13px;margin-top:8px;max-width:60ch;margin-left:auto;margin-right:auto}
+
+  /* attention visual */
+  .attn{position:relative;background:radial-gradient(circle at 40% 0,#171b40,#0d1030);border:1px solid var(--line);border-radius:16px;padding:78px 16px 20px;margin-top:8px;overflow:hidden}
+  .attn-arcs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .attn-words{position:relative;display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+  .aw{font-family:"Sora",sans-serif;font-weight:600;font-size:15px;padding:7px 11px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--text);cursor:pointer;transition:all .16s ease}
+  .aw:hover{border-color:var(--ml)}
+  .aw.focus{background:var(--gen);border-color:var(--gen);color:#3a0c14}
+  .aw.lit{border-color:var(--ml)}
+  .attn-cap{text-align:center;color:var(--muted);font-size:14px;margin-top:14px;min-height:20px}
+
+  /* transistor switch */
+  .switchwrap{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}
+  .tswitch{width:64px;height:34px;border-radius:999px;background:#11142f;border:1px solid var(--line);position:relative;cursor:pointer;flex:0 0 auto;transition:background .2s ease}
+  .tswitch.on{background:var(--good)}
+  .tknob{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s ease}
+  .tswitch.on .tknob{left:35px}
+  .switchwrap .sl{font-family:"Sora",sans-serif;font-weight:700;font-size:18px}
+
+  /* agentic */
+  .fbox.cyc{border-color:var(--gen);color:#ffc6cf;box-shadow:0 0 0 1px var(--gen)}
+  .toolrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+  .tool{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 13px;font-size:13.5px;font-family:"Sora",sans-serif;font-weight:600}
+  .tool span{font-size:16px}
+  .auto{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .autobtn{flex:1;min-width:120px;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;font-family:"Sora",sans-serif;font-weight:600;font-size:13.5px;color:var(--muted);transition:all .16s ease}
+  .autobtn:hover{color:var(--text)}
+  .autobtn[data-lvl="1"].active{border-color:var(--good);background:rgba(52,211,153,.12);color:#a9f3d6}
+  .autobtn[data-lvl="2"].active{border-color:var(--dl);background:rgba(245,165,36,.12);color:#ffd79a}
+  .autobtn[data-lvl="3"].active{border-color:var(--gen);background:rgba(251,113,133,.12);color:#ffc6cf}
+  .autodesc{margin-top:12px;color:var(--muted);font-size:14.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+
+  /* myths */
+  .mrow{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gen);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+  .mrow .mh{font-family:"Sora",sans-serif;font-weight:700;font-size:14.5px;color:#ffc6cf}
+  .mrow .mr{color:var(--muted);font-size:14px;margin-top:6px}
+  .mrow .mr b{color:var(--good);font-family:"Sora",sans-serif;font-weight:600}
+
+  /* quiz */
+  .quiz{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:18px}
+  .qprog{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;font-family:"Sora",sans-serif;font-weight:600;margin-bottom:12px}
+  .qbar{height:6px;background:#11142f;border-radius:999px;overflow:hidden;margin-bottom:18px}
+  .qbar i{display:block;height:100%;background:linear-gradient(90deg,var(--ai),var(--ml));width:0;transition:width .4s ease}
+  .qq{font-family:"Sora",sans-serif;font-weight:700;font-size:18px;margin-bottom:14px;line-height:1.35}
+  .qopts{display:flex;flex-direction:column;gap:9px}
+  .qopt{text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14.5px;cursor:pointer;font-family:inherit;transition:all .15s ease}
+  .qopt:hover:enabled{border-color:var(--ml)}
+  .qopt:disabled{cursor:default;opacity:.95}
+  .qopt.correct{border-color:var(--good);background:rgba(52,211,153,.12)}
+  .qopt.wrong{border-color:var(--gen);background:rgba(251,113,133,.12)}
+  .qexp{margin-top:13px;color:var(--muted);font-size:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:none}
+  .qexp.show{display:block}
+  .qexp b{color:var(--text);font-family:"Sora",sans-serif;font-weight:600}
+  .qresult{text-align:center;padding:8px 0}
+  .qscore{font-family:"Sora",sans-serif;font-weight:800;font-size:44px;margin:4px 0;color:var(--ml)}
+
+  /* recap */
+  .recap{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:8px 6px;margin-top:18px}
+  .step{display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .dot{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:"Sora",sans-serif;font-weight:700;color:#0c0f24}
+  .step h4{font-family:"Sora",sans-serif;margin:3px 0 4px;font-size:16px}
+  .step p{margin:0;color:var(--muted);font-size:14.5px}
+  footer{text-align:center;color:var(--muted);font-size:13.5px;margin-top:46px}
+</style>
+</head>
+<body>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+
+<div class="shell">
+  <header>
+    <p class="kicker">An interactive intro for public officials</p>
+    <h1>Artificial Intelligence 101</h1>
+    <p class="sub">Built for social-protection teams who are new to AI and will go on to shape their own programs. Explore each tab at your own pace.</p>
+    <nav>
+      <button class="pill active" data-target="c-circles">The Big Picture</button>
+      <button class="pill" data-target="c-learn">How It Learns</button>
+      <button class="pill" data-target="c-triad">Three Ingredients</button>
+      <button class="pill" data-target="c-history">History</button>
+      <button class="pill" data-target="c-scale">Hardware &amp; Scale</button>
+      <button class="pill" data-target="c-predict">Prediction</button>
+      <button class="pill" data-target="c-transformer">The Transformer</button>
+      <button class="pill" data-target="c-agent">Agentic AI</button>
+      <button class="pill" data-target="c-terms">Key Terms</button>
+      <button class="pill" data-target="c-myths">Myths &amp; Limits</button>
+      <button class="pill" data-target="c-social">For Social Protection</button>
+      <button class="pill" data-target="c-recap">Recap</button>
+      <button class="pill" data-target="c-quiz">Quiz</button>
+    </nav>
+  </header>
+
+  <!-- CIRCLES -->
+  <section class="chapter active" id="c-circles">
+    <h2>From AI to Generative AI</h2>
+    <p class="lead">These four ideas sit inside one another. Watch them nest from the outside in, then click any ring to read about it.</p>
+    <div class="circle-stage">
+      <div class="ringbox">
+        <svg id="rings" viewBox="0 0 400 400" aria-label="Concentric circles from AI to Generative AI">
+          <circle id="ringAI"  class="ring ring-hit" data-step="0" cx="200" cy="200" r="180" fill="rgba(99,102,241,.16)" stroke="#6366F1" stroke-width="2.5" style="color:#6366F1"/>
+          <circle id="ringML"  class="ring ring-hit" data-step="1" cx="200" cy="200" r="134" fill="rgba(34,211,238,.16)" stroke="#22D3EE" stroke-width="2.5" style="color:#22D3EE"/>
+          <circle id="ringDL"  class="ring ring-hit" data-step="2" cx="200" cy="200" r="90"  fill="rgba(245,165,36,.18)" stroke="#F5A524" stroke-width="2.5" style="color:#F5A524"/>
+          <circle id="ringGEN" class="ring ring-hit" data-step="3" cx="200" cy="200" r="48"  fill="rgba(251,113,133,.22)" stroke="#FB7185" stroke-width="2.5" style="color:#FB7185"/>
+          <text id="labAI"  class="rlabel" x="200" y="38"  text-anchor="middle" font-size="15">Artificial Intelligence</text>
+          <text id="labML"  class="rlabel" x="200" y="84"  text-anchor="middle" font-size="14">Machine Learning</text>
+          <text id="labDL"  class="rlabel" x="200" y="126" text-anchor="middle" font-size="13">Deep Learning</text>
+          <text id="labGEN" class="rlabel" x="200" y="204" text-anchor="middle" font-size="12.5">Generative AI</text>
+        </svg>
+      </div>
+      <div>
+        <div class="desc" id="ringDesc">
+          <span class="tag" id="ringTag" style="background:rgba(99,102,241,.2);color:#a8aaff">Outer ring</span>
+          <h3 id="ringTitle">Artificial Intelligence</h3>
+          <p id="ringText">The big umbrella. AI covers any computer system that performs tasks we link with human thinking, such as seeing, reading, deciding, or talking.</p>
+        </div>
+        <div class="controls"><button class="btn primary" id="playBtn">Replay animation</button></div>
+        <p class="hint">Tip: click a ring in the diagram to jump to its explanation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT LEARNS -->
+  <section class="chapter" id="c-learn">
+    <h2>How a machine learns</h2>
+    <p class="lead">This is the idea under everything else. It helps to see it as a flip in who writes the rules.</p>
+
+    <p class="lead" style="margin-top:18px;color:var(--text);font-family:Sora,sans-serif;font-weight:600">The old way: a person writes the rules.</p>
+    <div class="flow">
+      <div class="fbox">Rules<small>written by people</small></div>
+      <div class="farrow">+</div>
+      <div class="fbox">Data<small>the facts</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">Computer</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox">Answers</div>
+    </div>
+
+    <p class="lead" style="margin-top:24px;color:var(--text);font-family:Sora,sans-serif;font-weight:600">Machine learning: the computer finds the rules.</p>
+    <div class="flow">
+      <div class="fbox">Data<small>examples</small></div>
+      <div class="farrow">+</div>
+      <div class="fbox">Answers<small>the right ones</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">Computer</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox good">Rules<small>learned</small></div>
+    </div>
+    <p class="flabel">You give it many examples with the right answers, and it works out the rule on its own.</p>
+
+    <div class="note"><b>A simple picture of training.</b> Show a system thousands of photos labelled cat or not cat. Each time it guesses wrong, it nudges its internal dials a little. After enough examples it has tuned itself to tell cats from everything else. Nobody wrote a rule about ears or whiskers. The system found the pattern.</div>
+
+    <div class="flow" style="margin-top:16px">
+      <div class="fbox">Show an example</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox">Model guesses</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox">Check the answer</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">Adjust the dials</div>
+    </div>
+    <p class="flabel">Repeat this loop millions of times. That whole process is what people mean by "training."</p>
+  </section>
+
+  <!-- TRIAD -->
+  <section class="chapter" id="c-triad">
+    <h2>The three ingredients of AI</h2>
+    <p class="lead">Every AI system rests on three things working together, often called the AI triad. Take any one away and it does not work. Tap each one to see why.</p>
+    <div class="circle-stage">
+      <div class="ringbox">
+        <svg id="triad" viewBox="0 0 400 360" aria-label="Triangle of data, compute, and algorithms with AI in the center">
+          <line x1="200" y1="70" x2="90" y2="280" stroke="#2C3262" stroke-width="2"/>
+          <line x1="200" y1="70" x2="310" y2="280" stroke="#2C3262" stroke-width="2"/>
+          <line x1="90" y1="280" x2="310" y2="280" stroke="#2C3262" stroke-width="2"/>
+          <circle class="tri-hit" data-k="data" cx="200" cy="70" r="46" fill="rgba(34,211,238,.16)" stroke="#22D3EE" stroke-width="2.5" style="cursor:pointer"/>
+          <text x="200" y="75" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" font-family="Sora,sans-serif" pointer-events="none">Data</text>
+          <circle class="tri-hit" data-k="compute" cx="90" cy="280" r="46" fill="rgba(245,165,36,.18)" stroke="#F5A524" stroke-width="2.5" style="cursor:pointer"/>
+          <text x="90" y="285" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff" font-family="Sora,sans-serif" pointer-events="none">Compute</text>
+          <circle class="tri-hit" data-k="algo" cx="310" cy="280" r="46" fill="rgba(251,113,133,.2)" stroke="#FB7185" stroke-width="2.5" style="cursor:pointer"/>
+          <text x="310" y="278" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Sora,sans-serif" pointer-events="none">Algorithms</text>
+          <circle cx="200" cy="210" r="33" fill="rgba(99,102,241,.28)" stroke="#6366F1" stroke-width="2.5"/>
+          <text x="200" y="215" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-family="Sora,sans-serif" pointer-events="none">AI</text>
+        </svg>
+      </div>
+      <div>
+        <div class="desc" id="triDesc">
+          <span class="tag" id="triTag" style="background:rgba(99,102,241,.2);color:#a8aaff">The AI triad</span>
+          <h3 id="triTitle">All three, together</h3>
+          <p id="triText">A great method with no data learns nothing. Mountains of data with no compute cannot be trained. The three only produce a working system when they come together.</p>
+        </div>
+        <p class="hint">Tap data, compute, or algorithms in the triangle.</p>
+      </div>
+    </div>
+    <div class="note"><b>Why this matters for you.</b> When you weigh any AI proposal, ask about all three. Is the data accurate, fair, and lawful to use? Is there enough compute, and at what cost? Is the method proven for this task? A weak link in any one of them puts the whole project at risk.</div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="chapter" id="c-history">
+    <h2>How we got here</h2>
+    <p class="lead">AI is not new. The idea is over seventy years old. What changed recently is the raw computing power and data behind it. Here are the moments that matter.</p>
+    <div class="timeline">
+      <div class="tl"><div class="yr">1947</div><h4>The transistor is invented</h4><p>At Bell Labs, a tiny electronic switch is born. Every computer chip since is built from these switches. This is the seed of all modern computing.</p></div>
+      <div class="tl"><div class="yr">1950</div><h4>Turing asks if machines can think</h4><p>Alan Turing proposes a simple test: can a machine hold a conversation well enough to seem human? The question still frames the field.</p></div>
+      <div class="tl"><div class="yr">1956</div><h4>The term "artificial intelligence" is coined</h4><p>A summer workshop at Dartmouth College gives the field its name and launches it as a research area.</p></div>
+      <div class="tl"><div class="yr">1965</div><h4>Moore's Law is observed</h4><p>Gordon Moore notices that the number of transistors on a chip keeps doubling. Computing gets cheaper and faster for decades, which later becomes the fuel for AI.</p></div>
+      <div class="tl"><div class="yr">1970s &amp; 1980s</div><h4>The "AI winters"</h4><p>Progress stalls and funding dries up twice. The ambitions of the time run far ahead of the available computing power.</p></div>
+      <div class="tl"><div class="yr">1997</div><h4>A computer beats the world chess champion</h4><p>IBM's Deep Blue defeats Garry Kasparov, a public sign that machines can outmatch people at narrow, rule-bound tasks.</p></div>
+      <div class="tl"><div class="yr">2012</div><h4>Deep learning breaks through</h4><p>A neural network called AlexNet wins an image-recognition contest by a wide margin, powered by graphics chips. The modern AI boom begins.</p></div>
+      <div class="tl"><div class="yr">2017</div><h4>The Transformer arrives</h4><p>A new design for handling language, introduced in a paper titled "Attention Is All You Need," becomes the engine inside today's chatbots.</p></div>
+      <div class="tl k"><div class="yr">2020</div><h4>Scaling laws and GPT-3</h4><p>Researchers show that bigger models trained on more data and compute get predictably better. Large language models start to feel genuinely capable.</p></div>
+      <div class="tl k"><div class="yr">2022</div><h4>ChatGPT reaches everyone</h4><p>A free chatbot puts generative AI in the hands of the public. Adoption is the fastest of any consumer tool in history.</p></div>
+      <div class="tl k"><div class="yr">2023 onward</div><h4>Governments respond</h4><p>Generative AI spreads into daily work while regulators move to set rules, such as the European Union's AI Act, the first broad law of its kind.</p></div>
+    </div>
+  </section>
+
+  <!-- HARDWARE & SCALE -->
+  <section class="chapter" id="c-scale">
+    <h2>Why hardware decides what AI can do</h2>
+    <p class="lead">AI runs on physical machines. Two ideas explain why it suddenly took off: the transistor that made cheap computing possible, and the scaling laws that showed how to turn that computing into capability.</p>
+
+    <div class="cols">
+      <div class="ucard"><h4><span class="ic">🔌</span> The transistor</h4><p>A transistor is a microscopic switch that flips between on and off, the 1s and 0s a computer thinks in. The first one in 1947 was the size of a hand. Today billions fit on a chip smaller than a fingernail.</p></div>
+      <div class="ucard"><h4><span class="ic">📈</span> Moore's Law</h4><p>For decades the number of transistors per chip doubled roughly every two years. That steady doubling made computing power cheap and abundant, which is the raw material every AI system consumes.</p></div>
+    </div>
+
+    <div class="switchwrap">
+      <div class="tswitch" id="tswitch"><div class="tknob"></div></div>
+      <div><div class="sl" id="tswitchLabel" style="color:var(--gen)">0 &middot; off</div><div style="color:var(--muted);font-size:13px">Tap the switch. A transistor is just this, an on-off switch, built billions of times onto one chip.</div></div>
+    </div>
+
+    <div class="note"><b>The link to AI.</b> Modern AI needs vast amounts of computing power, called compute. Graphics chips first built for video games turned out to be ideal for it, because they run many small calculations at once. Without cheap, plentiful compute, today's AI would not exist.</div>
+
+    <h2 style="margin-top:30px">The scaling laws (Kaplan, 2020)</h2>
+    <p class="lead">In 2020 a team led by Jared Kaplan found something striking. As you increase three things, a model's performance improves in a smooth, predictable curve. The three things are model size (parameters), training data, and compute. Drag the slider to feel how it behaves.</p>
+
+    <div class="panel">
+      <div class="chartwrap">
+        <svg id="scaleChart" viewBox="0 0 520 280" aria-label="Capability rises with diminishing returns as compute grows">
+          <line x1="50" y1="240" x2="500" y2="240" stroke="#2C3262" stroke-width="1.5"/>
+          <line x1="50" y1="240" x2="50" y2="20" stroke="#2C3262" stroke-width="1.5"/>
+          <text x="275" y="268" text-anchor="middle" fill="#9AA0CF" font-size="12" font-family="Inter">More compute, data, and model size  →</text>
+          <text x="20" y="130" text-anchor="middle" fill="#9AA0CF" font-size="12" font-family="Inter" transform="rotate(-90 20 130)">Capability  →</text>
+          <polyline id="capCurve" fill="none" stroke="url(#g1)" stroke-width="3" points=""/>
+          <line id="vline" x1="50" y1="240" x2="50" y2="240" stroke="#FB7185" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle id="capDot" cx="50" cy="240" r="7" fill="#FB7185"/>
+          <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+        </svg>
+      </div>
+      <input type="range" id="scaleSlider" min="1" max="100" value="20">
+      <div class="readouts">
+        <div class="ro"><div class="l">Compute used</div><div class="v" id="roCompute" style="color:var(--ml)">20&times;</div></div>
+        <div class="ro"><div class="l">Capability</div><div class="v" id="roCap" style="color:var(--good)">good</div></div>
+        <div class="ro"><div class="l">Cost &amp; energy</div><div class="v" id="roCost" style="color:var(--gen)">20&times;</div></div>
+      </div>
+    </div>
+
+    <div class="note"><b>Why officials should care.</b> Predictability changed the game. Once teams knew that more compute would reliably buy more capability, a race to build larger models began. A later refinement in 2022, known as Chinchilla, showed that data should grow alongside model size for the best results.</div>
+    <div class="note warn"><b>The catch.</b> Bigger is not free. Cost and energy climb steeply, the gains get smaller as you scale, and scale alone does not remove bias or stop a model from being confidently wrong. Capability and trustworthiness are separate problems.</div>
+  </section>
+
+  <!-- PREDICTION -->
+  <section class="chapter" id="c-predict">
+    <h2>Generative AI predicts the next piece</h2>
+    <p class="lead">A model writes one small piece at a time. At each step it reads everything so far and scores what is likely to come next. Pick a starter, then tap a word to add it and watch the scores update.</p>
+    <div class="seedrow" id="seeds"></div>
+    <div class="sentence" id="sentence"></div>
+    <div class="bars" id="bars"><div class="bartitle">What might come next, and how likely the model rates it:</div></div>
+    <div class="donebox" id="done"></div>
+    <div class="controls" style="margin-top:16px">
+      <button class="btn" id="autoBtn">Let it write 4 words</button>
+      <button class="btn" id="resetBtn">Start over</button>
+    </div>
+    <div class="note"><b>Temperature.</b> The model does not always grab the highest bar. A setting called temperature lets it sometimes pick a lower one, which keeps the writing varied. You just played the role of that picker.</div>
+  </section>
+
+  <!-- TRANSFORMER -->
+  <section class="chapter" id="c-transformer">
+    <h2>The Transformer, made simple</h2>
+    <p class="lead">The Transformer is the design inside today's chatbots, including ChatGPT and Claude. It is the T in GPT. Its one big trick is called attention.</p>
+    <p class="lead" style="margin-top:14px">Attention means that for every word, the model looks at all the other words and decides which ones help it make sense. Tap any word below to see what it leans on.</p>
+
+    <div class="attn">
+      <svg class="attn-arcs" id="attnArcs"></svg>
+      <div class="attn-words" id="attnWords"></div>
+    </div>
+    <div class="attn-cap" id="attnCap"></div>
+
+    <div class="note"><b>Why this matters.</b> To understand the word "it" in that sentence, the model needs to know it means the trophy. Attention lets "it" reach back to "trophy" and lock onto it. That is how the model keeps track of meaning across a whole passage.</div>
+
+    <p class="lead" style="margin-top:20px">The Transformer uses attention to do the next-word prediction you saw earlier, again and again:</p>
+    <div class="flow">
+      <div class="fbox">Read all words so far</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">Attention<small>weigh what matters</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox">Predict the next word</div>
+    </div>
+    <p class="flabel">Then it adds that word and runs the loop again. Two strengths made it a turning point: it understands context across a whole passage, and it reads all the words at once, which makes training on huge amounts of text possible.</p>
+  </section>
+
+  <!-- AGENTIC AI -->
+  <section class="chapter" id="c-agent">
+    <h2>Agentic AI: from answering to doing</h2>
+    <p class="lead">So far the AI you have seen produces content. You ask, it answers. Agentic AI is the next step. You hand it a goal, and it carries out the steps to reach it.</p>
+
+    <div class="cols">
+      <div class="ucard"><h4><span class="ic">💬</span> A chatbot</h4><p>You ask a question. It gives an answer and stops. The doing is left to you.</p></div>
+      <div class="ucard"><h4><span class="ic">🤖</span> An agent</h4><p>You set a goal. It plans the steps, uses tools to carry them out, checks its progress, and reports back when finished.</p></div>
+    </div>
+
+    <h2 style="font-size:20px;margin-top:26px">What an agent is made of</h2>
+    <p class="lead">An agent is the model plus a few parts around it that let it plan, remember, look things up, and act. Here is how they fit together.</p>
+    <div class="ringbox">
+      <svg viewBox="0 0 600 430" aria-label="The parts of an AI agent: reasoning core, planning, memory, knowledge, tools, and guardrails">
+        <text x="300" y="56" text-anchor="middle" font-size="12" font-family="Inter" fill="#9AA0CF" letter-spacing="2">GUARDRAILS &#183; SAFETY LIMITS</text>
+        <rect x="92" y="72" width="416" height="300" rx="24" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
+        <line x1="300" y1="222" x2="190" y2="150" stroke="#2C3262" stroke-width="2"/>
+        <line x1="300" y1="222" x2="410" y2="150" stroke="#2C3262" stroke-width="2"/>
+        <line x1="300" y1="222" x2="190" y2="300" stroke="#2C3262" stroke-width="2"/>
+        <line x1="300" y1="222" x2="410" y2="300" stroke="#2C3262" stroke-width="2"/>
+        <rect x="6" y="205" width="74" height="34" rx="9" fill="#1B1F44" stroke="#22D3EE" stroke-width="2"/>
+        <text x="43" y="227" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Goal</text>
+        <line x1="80" y1="222" x2="240" y2="222" stroke="#22D3EE" stroke-width="2.5"/>
+        <polygon points="246,222 238,217 238,227" fill="#22D3EE"/>
+        <line x1="354" y1="222" x2="512" y2="222" stroke="#FB7185" stroke-width="2.5"/>
+        <polygon points="518,222 510,217 510,227" fill="#FB7185"/>
+        <rect x="520" y="205" width="74" height="34" rx="9" fill="#1B1F44" stroke="#FB7185" stroke-width="2"/>
+        <text x="557" y="227" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Action</text>
+        <circle cx="190" cy="150" r="40" fill="rgba(34,211,238,.16)" stroke="#22D3EE" stroke-width="2.5"/>
+        <text x="190" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Planning</text>
+        <circle cx="410" cy="150" r="40" fill="rgba(245,165,36,.18)" stroke="#F5A524" stroke-width="2.5"/>
+        <text x="410" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Memory</text>
+        <circle cx="190" cy="300" r="44" fill="rgba(52,211,153,.16)" stroke="#34D399" stroke-width="2.5"/>
+        <text x="190" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Knowledge</text>
+        <text x="190" y="313" text-anchor="middle" font-size="10.5" fill="#cfeede" font-family="Inter">(RAG)</text>
+        <circle cx="410" cy="300" r="40" fill="rgba(251,113,133,.2)" stroke="#FB7185" stroke-width="2.5"/>
+        <text x="410" y="305" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Sora,sans-serif">Tools</text>
+        <circle cx="300" cy="222" r="54" fill="rgba(99,102,241,.28)" stroke="#6366F1" stroke-width="3"/>
+        <text x="300" y="218" text-anchor="middle" font-size="14" font-weight="800" fill="#fff" font-family="Sora,sans-serif">Reasoning</text>
+        <text x="300" y="234" text-anchor="middle" font-size="11.5" fill="#c7cbff" font-family="Inter">core (model)</text>
+      </svg>
+    </div>
+    <div class="cols" style="margin-top:14px">
+      <div class="ucard"><h4><span class="ic">🧠</span> Reasoning core</h4><p>The model at the center that decides what to do at each step.</p></div>
+      <div class="ucard"><h4><span class="ic">🗺️</span> Planning</h4><p>Breaks the goal into an ordered set of steps before acting.</p></div>
+      <div class="ucard"><h4><span class="ic">💾</span> Memory</h4><p>Keeps track of what has happened and what it learned, within a task and sometimes across tasks.</p></div>
+      <div class="ucard"><h4><span class="ic">📚</span> Knowledge (RAG)</h4><p>Looks up trusted information from a connected source before it answers.</p></div>
+      <div class="ucard"><h4><span class="ic">🛠️</span> Tools</h4><p>The outside actions it can take, such as search, a calculation, or updating a record.</p></div>
+      <div class="ucard"><h4><span class="ic">🛡️</span> Guardrails</h4><p>The safety limits around everything, setting what it may and may not do.</p></div>
+    </div>
+
+    <h2 style="font-size:20px;margin-top:26px">How an agent works</h2>
+    <p class="lead">It runs a simple loop until the goal is met. Watch the three middle steps cycle.</p>
+    <div class="flow" id="agentFlow">
+      <div class="fbox">Goal</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox" data-cyc>Plan the steps</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox" data-cyc>Take an action<small>use a tool</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox" data-cyc>Check the result</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox good">Done</div>
+    </div>
+    <p class="flabel">If the goal is not met yet, it loops back to plan the next step. Those three steps repeat until the work is finished.</p>
+
+    <h2 style="font-size:20px;margin-top:26px">The tools an agent can use</h2>
+    <p class="lead">A tool is any action you allow the agent to take. For example:</p>
+    <div class="toolrow">
+      <div class="tool"><span>🔍</span> Search the web</div>
+      <div class="tool"><span>📄</span> Read a document</div>
+      <div class="tool"><span>📝</span> Fill a form</div>
+      <div class="tool"><span>✉️</span> Draft a message</div>
+      <div class="tool"><span>🧮</span> Run a calculation</div>
+      <div class="tool"><span>🗃️</span> Update a record</div>
+    </div>
+
+    <div class="note"><b>A social-protection example.</b> A citizen asks about their application. A benefits assistant agent looks up the case, checks which documents are missing, and drafts a reminder to the applicant. It then hands the draft to a caseworker to review, approve, and send. The agent does the legwork. The person keeps the decision.</div>
+
+    <h2 style="font-size:20px;margin-top:26px">How much freedom to give it</h2>
+    <p class="lead">Because an agent takes actions, the main choice is how much it may do on its own. Pick a level to see what it means.</p>
+    <div class="auto" id="autoSel">
+      <div class="autobtn active" data-lvl="1">Suggests only</div>
+      <div class="autobtn" data-lvl="2">Acts with approval</div>
+      <div class="autobtn" data-lvl="3">Acts on its own</div>
+    </div>
+    <div class="autodesc" id="autoDesc"></div>
+
+    <div class="note warn"><b>Why agents need tighter limits.</b> An agent does things, so a mistake has direct effects. Never let it take an irreversible action on its own, such as stopping a payment, denying a claim, or sending an official letter. Require human approval before anything that affects a person, keep a full log of what it did, and start at the suggest-only level.</div>
+  </section>
+
+  <!-- TERMS -->
+  <section class="chapter" id="c-terms">
+    <h2>Key terms, in plain words</h2>
+    <p class="lead">The vocabulary you will hear most often, grouped by theme, with a simple picture for each.</p>
+    <div id="termsRoot"></div>
+  </section>
+
+  <!-- MYTHS & LIMITS -->
+  <section class="chapter" id="c-myths">
+    <h2>What AI cannot do, and common myths</h2>
+    <p class="lead">A balanced 101 needs the limits too. These are the misunderstandings worth clearing up before anyone designs a program.</p>
+    <div style="margin-top:18px">
+      <div class="mrow"><div class="mh">Myth: AI thinks and understands like a person.</div><div class="mr"><b>Reality.</b> It finds patterns in data and predicts likely outputs. There is no awareness or understanding behind it.</div></div>
+      <div class="mrow"><div class="mh">Myth: AI is objective and neutral.</div><div class="mr"><b>Reality.</b> It learns from human data, so it can absorb and repeat human bias. Fairness has to be designed in and tested for.</div></div>
+      <div class="mrow"><div class="mh">Myth: if the computer says it, it must be right.</div><div class="mr"><b>Reality.</b> Models can state false things with full confidence. Outputs need checking, above all for facts and for people's entitlements.</div></div>
+      <div class="mrow"><div class="mh">Myth: bigger models are always better.</div><div class="mr"><b>Reality.</b> More scale helps, yet it raises cost and energy and does not remove bias or error. Capability and trustworthiness are separate things.</div></div>
+      <div class="mrow"><div class="mh">Myth: AI can replace human judgment about people.</div><div class="mr"><b>Reality.</b> For any decision that affects someone's support, it should assist while a person stays in charge.</div></div>
+      <div class="mrow"><div class="mh">Myth: a model knows everything up to today.</div><div class="mr"><b>Reality.</b> It only knows what was in its training unless it is connected to live information, so it can be out of date.</div></div>
+    </div>
+    <div class="note warn"><b>The honest summary.</b> AI is a powerful pattern tool. It can be confidently wrong, it can carry the biases in its data, and it does not know anything that was not in its training unless it is connected to live information. Treat its output as a draft to check, not a verdict.</div>
+  </section>
+
+  <!-- SOCIAL PROTECTION -->
+  <section class="chapter" id="c-social">
+    <h2>What this means for social protection</h2>
+    <p class="lead">AI can strengthen safety nets, and it can also harm the people they exist to protect. Both are real. Officials need to hold the opportunity and the risk in view at the same time.</p>
+
+    <h2 style="font-size:20px;margin-top:24px">Where it can help</h2>
+    <div class="cols">
+      <div class="ucard"><h4><span class="ic">💬</span> Faster service</h4><p>Chatbots and document readers can answer benefit questions around the clock and speed up application handling, freeing staff for complex cases.</p></div>
+      <div class="ucard"><h4><span class="ic">🔎</span> Better take-up</h4><p>Models can help find people who qualify for support but never applied, so programs reach more of the people they are meant to serve.</p></div>
+      <div class="ucard"><h4><span class="ic">🌦️</span> Early warning</h4><p>Forecasts can flag droughts, price shocks, or demand spikes, letting governments trigger support before a crisis deepens.</p></div>
+      <div class="ucard"><h4><span class="ic">🗂️</span> Caseworker support</h4><p>AI can summarize long case files and translate across languages, giving frontline staff more time with people instead of paperwork.</p></div>
+    </div>
+
+    <h2 style="font-size:20px;margin-top:28px">Where it can go wrong</h2>
+    <div class="note warn"><b>The Netherlands, childcare benefits.</b> A self-learning fraud-detection system wrongly labelled tens of thousands of families as fraudsters, with people of immigrant background hit hardest. Families were pushed into severe debt, and the national government resigned in 2021. The system was opaque and lacked proper human review.</div>
+    <div class="note warn"><b>Australia, "Robodebt."</b> An automated system raised false debts against hundreds of thousands of people by matching data crudely and removing human checks. It was ruled unlawful and caused deep and lasting harm.</div>
+    <p class="lead" style="margin-top:14px">The pattern in both is the same: a poorly tested model, little transparency, and no human truly in control. At the scale of a national program, a small error rate becomes harm to thousands of real people.</p>
+
+    <div class="note good"><b>The safeguards that matter most.</b> Keep a human in charge of any decision that can deny someone support. Give people a clear way to ask why and to appeal. Test for bias before and during use. Tell people when AI is involved. Protect sensitive data. Start with small, low-stakes pilots and watch them closely.</div>
+
+    <h2 style="font-size:20px;margin-top:28px">What good design looks like</h2>
+    <p class="lead">A safe setup uses AI to assist and keeps a person in charge of the decision. Here is the shape of it.</p>
+    <div class="flow">
+      <div class="fbox">Application</div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox hl">AI sorts and flags<small>assists only</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox good">Caseworker decides<small>human in charge</small></div>
+      <div class="farrow">&rarr;</div>
+      <div class="fbox">Outcome</div>
+    </div>
+    <p class="flabel">Every outcome has a clear route to ask why and to appeal, which sends problems back for review.</p>
+
+    <h2 style="font-size:20px;margin-top:28px">A framework for your own solutions</h2>
+    <p class="lead">A simple, repeatable way to weigh any idea before you commit to it.</p>
+    <div class="fw">
+      <div class="fwstep"><div class="n"></div><div><h4>Name the real problem</h4><p>State the citizen or system pain you want to fix, in one sentence, before naming any technology.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Check that AI fits</h4><p>Is there a genuine pattern in data to learn from? Sometimes a clearer form or a rule change solves it without AI.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Weigh the stakes</h4><p>If a mistake could deny someone food, shelter, or income, keep a person making the final call.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Get the data right</h4><p>Ask if the data is accurate, representative of everyone served, and lawful and ethical to use.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Build in oversight</h4><p>Design human review, a transparent explanation, and a working appeal route from day one.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Pilot, measure, then scale</h4><p>Start small, compare results against the old way, and check for unequal effects on different groups.</p></div></div>
+      <div class="fwstep"><div class="n"></div><div><h4>Set clear accountability</h4><p>Decide in advance who is answerable when the system makes a mistake, and how harm gets put right.</p></div></div>
+    </div>
+  </section>
+
+  <!-- RECAP -->
+  <section class="chapter" id="c-recap">
+    <h2>The whole story, briefly</h2>
+    <div class="recap">
+      <div class="step"><div class="dot" style="background:#6366F1">1</div><div><h4>AI is the goal</h4><p>Get computers to do tasks that usually call for human intelligence.</p></div></div>
+      <div class="step"><div class="dot" style="background:#22D3EE">2</div><div><h4>Machine learning is the method</h4><p>The computer learns patterns from examples instead of being told every rule.</p></div></div>
+      <div class="step"><div class="dot" style="background:#F5A524">3</div><div><h4>Hardware made it possible</h4><p>The transistor and decades of cheaper compute gave AI the power it needs.</p></div></div>
+      <div class="step"><div class="dot" style="background:#FB7185">4</div><div><h4>Scale made it capable</h4><p>More model, data, and compute reliably buys more capability, at rising cost.</p></div></div>
+      <div class="step"><div class="dot" style="background:#34D399">5</div><div><h4>Use it with care</h4><p>In social protection, keep humans in charge, stay transparent, and pilot before you scale.</p></div></div>
+    </div>
+    <footer>That is the foundation. Revisit any tab any time, and take the quiz to check what stuck.</footer>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="chapter" id="c-quiz">
+    <h2>Test yourself</h2>
+    <p class="lead">Eight quick questions drawn from the tabs. Pick an answer to see if it is right and why.</p>
+    <div class="quiz" id="quiz">
+      <div class="qprog"><span id="qcount">Question 1 of 8</span><span id="qscoreLine">Score 0</span></div>
+      <div class="qbar"><i id="qbarFill"></i></div>
+      <div id="qbody"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* nav */
+const pills=document.querySelectorAll('.pill'),chapters=document.querySelectorAll('.chapter');
+pills.forEach(p=>p.addEventListener('click',()=>{
+  pills.forEach(x=>x.classList.remove('active'));chapters.forEach(c=>c.classList.remove('active'));
+  p.classList.add('active');document.getElementById(p.dataset.target).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(p.dataset.target==='c-circles')playCircles();
+  if(p.dataset.target==='c-transformer'&&window.__drawAttn)setTimeout(window.__drawAttn,60);
+  if(p.dataset.target==='c-agent'&&window.__agentLoop)setTimeout(window.__agentLoop,60);
+}));
+
+/* circles */
+const ringData=[
+ {ring:'ringAI',lab:'labAI',tag:'Outer ring',tagbg:'rgba(99,102,241,.2)',tagfg:'#a8aaff',title:'Artificial Intelligence',text:'The big umbrella. AI covers any computer system that performs tasks we link with human thinking, such as seeing, reading, deciding, or talking.'},
+ {ring:'ringML',lab:'labML',tag:'Inside AI',tagbg:'rgba(34,211,238,.18)',tagfg:'#7fe9fb',title:'Machine Learning',text:'A way of building AI. You feed the system many examples, and it learns the patterns by itself instead of following hand written rules.'},
+ {ring:'ringDL',lab:'labDL',tag:'Inside machine learning',tagbg:'rgba(245,165,36,.18)',tagfg:'#ffce7a',title:'Deep Learning',text:'A powerful style of machine learning. It uses neural networks stacked in many layers, which lets it handle images, sound, and human language.'},
+ {ring:'ringGEN',lab:'labGEN',tag:'At the center',tagbg:'rgba(251,113,133,.2)',tagfg:'#ffaeba',title:'Generative AI',text:'The newest layer. It uses deep learning to create brand new content: text, images, code, and audio. Tools like ChatGPT and Claude live right here.'}
+];
+function setDesc(i){const d=ringData[i];const t=document.getElementById('ringTag');
+ t.textContent=d.tag;t.style.background=d.tagbg;t.style.color=d.tagfg;
+ document.getElementById('ringTitle').textContent=d.title;document.getElementById('ringText').textContent=d.text;
+ ringData.forEach(r=>document.getElementById(r.ring).classList.remove('pulse'));
+ const el=document.getElementById(d.ring);void el.offsetWidth;el.classList.add('pulse');}
+let ct=[];
+function playCircles(){ct.forEach(t=>clearTimeout(t));ct=[];
+ ringData.forEach(r=>{document.getElementById(r.ring).classList.remove('show');document.getElementById(r.lab).classList.remove('show');});
+ ringData.forEach((r,i)=>ct.push(setTimeout(()=>{document.getElementById(r.ring).classList.add('show');document.getElementById(r.lab).classList.add('show');setDesc(i);},350+i*900)));}
+document.getElementById('playBtn').addEventListener('click',playCircles);
+document.querySelectorAll('.ring-hit').forEach(r=>r.addEventListener('click',()=>setDesc(parseInt(r.dataset.step,10))));
+window.addEventListener('load',playCircles);
+
+/* scaling chart */
+(function(){
+ const slider=document.getElementById('scaleSlider');
+ const x0=50,x1=500,y0=240,yTop=30;
+ function capY(v){ // v 1..100 -> diminishing log curve
+   const f=Math.log10(v)/Math.log10(100); // 0..1
+   return y0-(y0-yTop)*f;
+ }
+ let pts='';for(let v=1;v<=100;v++){const x=x0+(x1-x0)*((v-1)/99);pts+=x.toFixed(1)+','+capY(v).toFixed(1)+' ';}
+ document.getElementById('capCurve').setAttribute('points',pts.trim());
+ function update(){
+   const v=+slider.value;const x=x0+(x1-x0)*((v-1)/99);const y=capY(v);
+   document.getElementById('capDot').setAttribute('cx',x);document.getElementById('capDot').setAttribute('cy',y);
+   const vl=document.getElementById('vline');vl.setAttribute('x1',x);vl.setAttribute('x2',x);vl.setAttribute('y1',y);
+   document.getElementById('roCompute').textContent=v+'\u00d7';
+   document.getElementById('roCost').textContent=v+'\u00d7';
+   const f=Math.log10(v)/Math.log10(100);
+   const label=f<0.3?'basic':f<0.55?'good':f<0.8?'strong':'frontier';
+   document.getElementById('roCap').textContent=label;
+ }
+ slider.addEventListener('input',update);update();
+})();
+
+/* prediction */
+const MAP={
+ "the":[["cat",.26],["sun",.2],["dog",.19],["sky",.18],["road",.17]],
+ "cat":[["sat",.3],["jumped",.21],["slept",.18],["ran",.16],["purred",.15]],
+ "sat":[["on",.55],["quietly",.18],["down",.15],["beside",.12]],
+ "on":[["the",.62],["top",.16],["a",.14],["its",.08]],
+ "once":[["upon",.92],["more",.05],["again",.03]],
+ "upon":[["a",.96],["the",.04]],
+ "a":[["time",.34],["small",.2],["sunny",.17],["quiet",.15],["big",.14]],
+ "time":[["there",.36],["ago",.22],["when",.2],["in",.13],["the",.09]],
+ "there":[["lived",.42],["was",.3],["lay",.15],["stood",.13]],
+ "lived":[["a",.7],["an",.18],["many",.12]],
+ "weather":[["today",.32],["is",.28],["was",.22],["here",.18]],
+ "today":[["is",.5],["was",.2],["feels",.16],["looks",.14]],
+ "is":[["sunny",.26],["bright",.22],["warm",.2],["calm",.17],["clear",.15]],
+ "sunny":[["and",.36],["with",.25],["today",.2],["outside",.19]],
+ "and":[["warm",.3],["bright",.26],["clear",.24],["still",.2]],
+ "warm":[["with",.34],["today",.26],["outside",.22],["air",.18]],
+ "bright":[["with",.34],["and",.26],["today",.22],["skies",.18]]
+};
+const FALLBACK=[["the",.25],["a",.21],["and",.2],["very",.18],["so",.16]];
+const SEEDS=["The cat sat on the","Once upon a","The weather today is"];
+let seedIdx=0,tokens=[],firstSeedLen=0,finished=false;
+const seedsEl=document.getElementById('seeds');
+SEEDS.forEach((s,i)=>{const b=document.createElement('button');b.className='seed'+(i===0?' active':'');b.textContent=s;b.addEventListener('click',()=>{seedIdx=i;startSeed();});seedsEl.appendChild(b);});
+function startSeed(){document.querySelectorAll('.seed').forEach((b,i)=>b.classList.toggle('active',i===seedIdx));
+ tokens=SEEDS[seedIdx].split(' ');firstSeedLen=tokens.length;finished=false;
+ document.getElementById('done').classList.remove('show');renderSentence(-1);renderBars();}
+function renderSentence(fresh){const el=document.getElementById('sentence');el.innerHTML='';
+ tokens.forEach((w,i)=>{const s=document.createElement('span');s.textContent=(i===0?'':' ')+w;if(i>=firstSeedLen)s.className='added';if(i===fresh)s.classList.add('fresh');el.appendChild(s);});
+ if(!finished){const c=document.createElement('span');c.className='caret';el.appendChild(c);}}
+function candidates(){const last=tokens[tokens.length-1].toLowerCase().replace(/[^a-z]/g,'');return (MAP[last]?MAP[last].slice():FALLBACK.slice()).sort((a,b)=>b[1]-a[1]).slice(0,5);}
+function renderBars(){const wrap=document.getElementById('bars');wrap.querySelectorAll('.bar').forEach(b=>b.remove());if(finished)return;
+ candidates().forEach((c,i)=>{const row=document.createElement('div');row.className='bar'+(i===0?' top':'');
+  row.innerHTML='<div class="w">'+c[0]+(i===0?'<span class="topbadge">TOP PICK</span>':'')+'</div><div class="track"><div class="fill"></div></div><div class="pct">'+Math.round(c[1]*100)+'%</div>';
+  row.addEventListener('click',()=>addWord(c[0]));wrap.appendChild(row);
+  requestAnimationFrame(()=>{row.querySelector('.fill').style.width=(c[1]*100)+'%';});});}
+function addWord(w){if(finished)return;tokens.push(w);renderSentence(tokens.length-1);if(tokens.length-firstSeedLen>=10){finish();return;}renderBars();}
+function finish(){finished=true;if(!/[.!?]$/.test(tokens[tokens.length-1]))tokens[tokens.length-1]+='.';renderSentence(-1);renderBars();
+ const d=document.getElementById('done');d.innerHTML='That is the whole loop. Read the context, score the options, add one, repeat. A real model does this with billions of internal settings and a far larger vocabulary, many times per second.';d.classList.add('show');}
+let autoRunning=false;
+document.getElementById('autoBtn').addEventListener('click',()=>{if(finished||autoRunning)return;autoRunning=true;let n=0;
+ const tick=()=>{if(n>=4||finished){autoRunning=false;return;}const list=candidates();const pool=list.slice(0,3);const r=Math.random();
+  const c=r<.6?pool[0]:(r<.85&&pool[1]?pool[1]:(pool[2]||pool[0]));addWord(c[0]);n++;setTimeout(tick,650);};tick();});
+document.getElementById('resetBtn').addEventListener('click',startSeed);
+startSeed();
+
+/* terms */
+const TERMS=[
+ {t:'Token',c:'#6366F1',p:'A small chunk of text, often a word or part of a word. Models read and write in tokens.',svg:'<rect x="4" y="14" width="14" height="14" rx="3" fill="#6366F1"/><rect x="20" y="14" width="9" height="14" rx="3" fill="#22D3EE"/><rect x="31" y="14" width="13" height="14" rx="3" fill="#F5A524"/>'},
+ {t:'Training data',c:'#22D3EE',p:'The huge collection of text, images, or other examples a model learns from.',svg:[8,21,34].map(x=>[6,19,32].map(y=>'<rect x="'+x+'" y="'+y+'" width="10" height="10" rx="2" fill="#22D3EE"/>').join('')).join('')},
+ {t:'Compute',c:'#F5A524',p:'The computing power used to train and run a model. AI needs a lot of it, supplied by specialized chips.',svg:'<rect x="10" y="10" width="28" height="28" rx="4" fill="none" stroke="#F5A524" stroke-width="3"/><rect x="18" y="18" width="12" height="12" rx="2" fill="#F5A524"/><line x1="14" y1="6" x2="14" y2="10" stroke="#F5A524" stroke-width="3"/><line x1="24" y1="6" x2="24" y2="10" stroke="#F5A524" stroke-width="3"/><line x1="34" y1="6" x2="34" y2="10" stroke="#F5A524" stroke-width="3"/><line x1="14" y1="38" x2="14" y2="42" stroke="#F5A524" stroke-width="3"/><line x1="24" y1="38" x2="24" y2="42" stroke="#F5A524" stroke-width="3"/><line x1="34" y1="38" x2="34" y2="42" stroke="#F5A524" stroke-width="3"/>'},
+ {t:'Parameters',c:'#FB7185',p:'The millions or billions of internal dials a model tunes during training. More can mean more capability.',svg:[8,18,28,38].map(x=>[10,20,30].map(y=>'<circle cx="'+x+'" cy="'+(y+2)+'" r="3" fill="#FB7185"/>').join('')).join('')},
+ {t:'Scaling laws',c:'#6366F1',p:'The finding that performance improves predictably as model size, data, and compute grow together.',svg:'<polyline points="8,40 18,33 28,22 40,10" fill="none" stroke="#6366F1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="10" r="3.5" fill="#22D3EE"/>'},
+ {t:'Prompt',c:'#22D3EE',p:'The text you give the model to get it started. Your question or instruction is a prompt.',svg:'<rect x="5" y="9" width="38" height="24" rx="6" fill="none" stroke="#22D3EE" stroke-width="3"/><polygon points="14,33 14,41 22,33" fill="#22D3EE"/><line x1="12" y1="18" x2="36" y2="18" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/><line x1="12" y1="25" x2="28" y2="25" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>'},
+ {t:'Neural network',c:'#F5A524',p:'A web of simple connected units inspired by the brain. It is the engine inside deep learning.',svg:'<line x1="10" y1="14" x2="24" y2="10" stroke="#2C3262" stroke-width="2"/><line x1="10" y1="14" x2="24" y2="24" stroke="#2C3262" stroke-width="2"/><line x1="10" y1="34" x2="24" y2="24" stroke="#2C3262" stroke-width="2"/><line x1="10" y1="34" x2="24" y2="38" stroke="#2C3262" stroke-width="2"/><line x1="24" y1="10" x2="40" y2="24" stroke="#2C3262" stroke-width="2"/><line x1="24" y1="24" x2="40" y2="24" stroke="#2C3262" stroke-width="2"/><line x1="24" y1="38" x2="40" y2="24" stroke="#2C3262" stroke-width="2"/><circle cx="10" cy="14" r="4" fill="#6366F1"/><circle cx="10" cy="34" r="4" fill="#6366F1"/><circle cx="24" cy="10" r="4" fill="#F5A524"/><circle cx="24" cy="24" r="4" fill="#F5A524"/><circle cx="24" cy="38" r="4" fill="#F5A524"/><circle cx="40" cy="24" r="4" fill="#FB7185"/>'},
+ {t:'Bias',c:'#FB7185',p:'When a model treats some groups unfairly because its training data or design carried that unfairness in.',svg:'<line x1="24" y1="6" x2="24" y2="16" stroke="#FB7185" stroke-width="3"/><line x1="10" y1="16" x2="38" y2="16" stroke="#FB7185" stroke-width="3"/><polygon points="10,16 4,28 16,28" fill="#FB7185"/><polygon points="38,16 30,34 46,34" fill="#2C3262" stroke="#FB7185" stroke-width="2"/>'},
+ {t:'Human in the loop',c:'#34D399',p:'A safeguard where a person reviews or approves a model decision before it affects someone.',svg:'<circle cx="24" cy="16" r="7" fill="none" stroke="#34D399" stroke-width="3"/><path d="M12 40 q12 -14 24 0" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round"/>'},
+ {t:'Hallucination',c:'#F5A524',p:'When a model states something false with full confidence. It predicts plausible text, and plausible text can still be wrong.',svg:'<circle cx="24" cy="24" r="17" fill="none" stroke="#F5A524" stroke-width="3"/><text x="24" y="31" text-anchor="middle" font-size="20" font-family="Sora,sans-serif" font-weight="700" fill="#F5A524">?</text>'},
+ {t:'Inference',c:'#22D3EE',p:'The moment a trained model is doing work, such as answering your message right now.',svg:'<polygon points="20,8 8,28 22,28 18,40 38,18 24,18" fill="#22D3EE"/>'},
+ {t:'Model',c:'#6366F1',p:'The finished, trained system. It is the thing you actually chat with or send requests to.',svg:'<rect x="8" y="8" width="32" height="32" rx="8" fill="none" stroke="#6366F1" stroke-width="3"/><circle cx="18" cy="20" r="3" fill="#6366F1"/><circle cx="30" cy="20" r="3" fill="#6366F1"/><path d="M17 29 Q24 34 31 29" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round"/>'},
+ {t:'Agent',c:'#FB7185',p:'An AI that is given a goal and takes steps to reach it, using tools and checking its own progress along the way.',svg:'<rect x="12" y="14" width="24" height="20" rx="5" fill="none" stroke="#FB7185" stroke-width="3"/><circle cx="20" cy="24" r="2.5" fill="#FB7185"/><circle cx="28" cy="24" r="2.5" fill="#FB7185"/><line x1="24" y1="8" x2="24" y2="14" stroke="#FB7185" stroke-width="3"/><circle cx="24" cy="7" r="2.5" fill="#FB7185"/><line x1="8" y1="22" x2="12" y2="22" stroke="#FB7185" stroke-width="3"/><line x1="36" y1="22" x2="40" y2="22" stroke="#FB7185" stroke-width="3"/>'},
+ {t:'Tool use',c:'#34D399',p:'When an AI calls on an outside action to get something done, such as searching, doing a calculation, or filling a form.',svg:'<path d="M30 10 a8 8 0 1 0 8 8 l-7 -1 -2 -5 z" fill="none" stroke="#34D399" stroke-width="3" stroke-linejoin="round"/><line x1="26" y1="22" x2="12" y2="36" stroke="#34D399" stroke-width="4" stroke-linecap="round"/>'},
+ {t:'Foundation model',c:'#6366F1',p:'A large, general model trained on broad data that many other tools are then built on top of.',svg:'<rect x="6" y="34" width="36" height="8" rx="2" fill="#6366F1"/><rect x="11" y="22" width="10" height="10" rx="2" fill="#22D3EE"/><rect x="27" y="22" width="10" height="10" rx="2" fill="#22D3EE"/><rect x="19" y="10" width="10" height="10" rx="2" fill="#F5A524"/>'},
+ {t:'Large language model',c:'#22D3EE',p:'A model trained on huge amounts of text so it can understand and produce language. The kind behind most chatbots, often shortened to LLM.',svg:'<rect x="8" y="8" width="32" height="32" rx="6" fill="none" stroke="#22D3EE" stroke-width="3"/><line x1="14" y1="16" x2="34" y2="16" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/><line x1="14" y1="22" x2="30" y2="22" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/><line x1="14" y1="28" x2="34" y2="28" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/><line x1="14" y1="34" x2="26" y2="34" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/>'},
+ {t:'Fine-tuning',c:'#F5A524',p:'Taking a general model and training it further on focused examples so it does one job well, such as handling benefit forms.',svg:'<line x1="8" y1="17" x2="40" y2="17" stroke="#2C3262" stroke-width="3"/><circle cx="31" cy="17" r="5" fill="#F5A524"/><line x1="8" y1="31" x2="40" y2="31" stroke="#2C3262" stroke-width="3"/><circle cx="16" cy="31" r="5" fill="#F5A524"/>'},
+ {t:'Distillation',c:'#34D399',p:'Training a smaller, cheaper model to copy a larger one, so you keep much of the ability at a fraction of the cost.',svg:'<polygon points="10,9 38,9 27,25 27,37 21,37 21,25" fill="none" stroke="#34D399" stroke-width="3" stroke-linejoin="round"/><circle cx="24" cy="43" r="2.5" fill="#34D399"/>'},
+ {t:'Context window',c:'#6366F1',p:'How much text a model can hold in mind at once. Go beyond it and the earliest details start to drop out.',svg:'<rect x="6" y="10" width="36" height="28" rx="5" fill="none" stroke="#6366F1" stroke-width="3"/><line x1="6" y1="18" x2="42" y2="18" stroke="#6366F1" stroke-width="2.5"/><line x1="12" y1="26" x2="36" y2="26" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/><line x1="12" y1="32" x2="28" y2="32" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/>'},
+ {t:'Retrieval (RAG)',c:'#22D3EE',p:'Connecting a model to a trusted source so it looks facts up before answering, which lowers the chance of made-up answers.',svg:'<rect x="7" y="8" width="19" height="26" rx="3" fill="none" stroke="#22D3EE" stroke-width="3"/><line x1="12" y1="15" x2="21" y2="15" stroke="#22D3EE" stroke-width="2.5"/><line x1="12" y1="21" x2="21" y2="21" stroke="#22D3EE" stroke-width="2.5"/><circle cx="31" cy="30" r="7" fill="none" stroke="#34D399" stroke-width="3"/><line x1="36" y1="35" x2="42" y2="41" stroke="#34D399" stroke-width="3" stroke-linecap="round"/>'},
+ {t:'Multimodal',c:'#F5A524',p:'A model that works with more than one kind of input, such as text, images, and audio together.',svg:'<rect x="6" y="14" width="12" height="12" rx="2" fill="#F5A524"/><circle cx="31" cy="20" r="6" fill="none" stroke="#22D3EE" stroke-width="3"/><path d="M8 35 q4 -7 8 0 t8 0 t8 0" fill="none" stroke="#FB7185" stroke-width="3" stroke-linecap="round"/>'},
+ {t:'Black box',c:'#FB7185',p:'A system whose inner workings you cannot see. An answer comes out, but the reasons stay hidden, which makes oversight harder.',svg:'<rect x="9" y="12" width="30" height="26" rx="4" fill="#2C3262" stroke="#FB7185" stroke-width="3"/><text x="24" y="33" text-anchor="middle" font-size="18" font-family="Sora,sans-serif" font-weight="700" fill="#FB7185">?</text>'},
+ {t:'Explainability',c:'#34D399',p:'How well a system can show the reasons behind its output in terms a person can check. The remedy for a black box.',svg:'<rect x="9" y="12" width="30" height="26" rx="4" fill="none" stroke="#34D399" stroke-width="3"/><circle cx="24" cy="25" r="6" fill="none" stroke="#34D399" stroke-width="3"/><circle cx="24" cy="25" r="2" fill="#34D399"/>'},
+ {t:'Automation bias',c:'#FB7185',p:'The human habit of trusting a computer\u2019s output too readily. A major cause of harm when staff wave through whatever it flags.',svg:'<rect x="20" y="13" width="8" height="14" rx="2" fill="none" stroke="#FB7185" stroke-width="3"/><rect x="13" y="26" width="22" height="5" rx="2" fill="#FB7185"/><rect x="17" y="33" width="14" height="6" rx="2" fill="#FB7185"/>'},
+ {t:'Guardrails',c:'#22D3EE',p:'Built-in limits that stop a model from doing or saying certain things. A basic safety control.',svg:'<path d="M24 7 L38 13 V24 C38 33 32 38 24 41 C16 38 10 33 10 24 V13 Z" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linejoin="round"/><path d="M18 24 l4 4 8 -9" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'},
+ {t:'Model drift',c:'#F5A524',p:'When a model slowly gets less accurate because the world changed and the model did not. A reason to keep watching it after launch.',svg:'<line x1="8" y1="13" x2="40" y2="13" stroke="#2C3262" stroke-width="2" stroke-dasharray="3 3"/><polyline points="8,15 18,18 28,27 40,38" fill="none" stroke="#F5A524" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'},
+ {t:'Alignment',c:'#6366F1',p:'The effort to make a model behave the way people intend and follow human values.',svg:'<circle cx="24" cy="24" r="15" fill="none" stroke="#6366F1" stroke-width="3"/><circle cx="24" cy="24" r="7" fill="none" stroke="#6366F1" stroke-width="3"/><circle cx="24" cy="24" r="2" fill="#22D3EE"/>'},
+ {t:'Open vs closed model',c:'#34D399',p:'Open models can be downloaded and run yourself. Closed models are used through a company\u2019s service. The choice shapes cost, control, and privacy.',svg:'<rect x="9" y="23" width="12" height="11" rx="2" fill="none" stroke="#34D399" stroke-width="3"/><path d="M11 23 v-4 a4 4 0 0 1 8 0" fill="none" stroke="#34D399" stroke-width="3"/><rect x="27" y="23" width="12" height="11" rx="2" fill="none" stroke="#FB7185" stroke-width="3"/><path d="M29 23 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="#FB7185" stroke-width="3"/>'},
+ {t:'Benchmark',c:'#22D3EE',p:'A standard test used to compare models. Helpful for evaluation, though a high score does not guarantee good results in the real world.',svg:'<line x1="8" y1="10" x2="8" y2="40" stroke="#2C3262" stroke-width="2"/><rect x="12" y="27" width="7" height="11" fill="#22D3EE"/><rect x="22" y="18" width="7" height="20" fill="#6366F1"/><rect x="32" y="23" width="7" height="15" fill="#F5A524"/>'},
+ {t:'Memory',c:'#F5A524',p:'What an agent keeps track of as it works: the current task, and sometimes what it learned in earlier tasks.',svg:'<path d="M12 10 h20 l6 6 v22 h-26 z" fill="none" stroke="#F5A524" stroke-width="3" stroke-linejoin="round"/><rect x="17" y="10" width="10" height="9" fill="#F5A524"/><rect x="16" y="26" width="16" height="9" rx="1" fill="none" stroke="#F5A524" stroke-width="2.5"/>'},
+ {t:'Planning',c:'#22D3EE',p:'When an agent breaks a goal into an ordered set of steps before it starts acting.',svg:'<rect x="10" y="8" width="28" height="32" rx="4" fill="none" stroke="#22D3EE" stroke-width="3"/><path d="M15 17 l2 2 4 -4" fill="none" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="25" y1="17" x2="32" y2="17" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/><path d="M15 28 l2 2 4 -4" fill="none" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="25" y1="28" x2="32" y2="28" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/>'}
+];
+const TERM_GROUPS=[
+ {h:'The building blocks',n:['Token','Training data','Compute','Parameters','Neural network','Model']},
+ {h:'How models are built',n:['Foundation model','Large language model','Scaling laws','Fine-tuning','Distillation']},
+ {h:'Using AI in practice',n:['Prompt','Context window','Inference','Retrieval (RAG)','Multimodal','Agent','Memory','Planning','Tool use','Hallucination']},
+ {h:'Understanding and governing AI',n:['Black box','Explainability','Bias','Automation bias','Human in the loop','Guardrails','Model drift','Alignment','Open vs closed model','Benchmark']}
+];
+(function(){
+ const byName={};TERMS.forEach(t=>byName[t.t]=t);
+ const root=document.getElementById('termsRoot');if(!root)return;
+ TERM_GROUPS.forEach(group=>{
+   const h=document.createElement('h3');h.className='termgroup';h.textContent=group.h;root.appendChild(h);
+   const grid=document.createElement('div');grid.className='terms';grid.style.marginTop='10px';
+   group.n.forEach(name=>{const d=byName[name];if(!d)return;
+     const el=document.createElement('div');el.className='term';
+     el.innerHTML='<svg viewBox="0 0 48 48">'+d.svg+'</svg><h4 style="color:'+d.c+'">'+d.t+'</h4><p>'+d.p+'</p>';grid.appendChild(el);});
+   root.appendChild(grid);
+ });
+})();
+
+/* attention visual (Transformer tab) */
+(function(){
+ const WORDS=["The","trophy","did","not","fit","because","it","was","too","big"];
+ const ATT={
+   6:{1:1.0,4:0.5,9:0.55,0:0.15},
+   1:{0:0.45,4:0.6,9:0.55,6:0.4},
+   9:{1:0.7,4:0.55,6:0.5,8:0.35},
+   4:{1:0.7,9:0.5,6:0.4},
+   7:{6:0.6,9:0.45,4:0.3}
+ };
+ const CAP={
+   6:'The word "it" leans hardest on "trophy". That is how the model knows what "it" means.',
+   1:'"trophy" connects to "fit" and "big", the words that describe it.',
+   9:'"big" links back to "trophy" and "fit", the thing that was too big.',
+   4:'"fit" ties together the trophy and how big it is.',
+   7:'"was" links the description back to "it".'
+ };
+ const wordsEl=document.getElementById('attnWords'),svg=document.getElementById('attnArcs'),capEl=document.getElementById('attnCap');
+ if(!wordsEl)return;
+ let focus=6;const chips=[];
+ WORDS.forEach((w,i)=>{const b=document.createElement('button');b.className='aw';b.textContent=w;
+   b.addEventListener('click',()=>{focus=i;render();});wordsEl.appendChild(b);chips.push(b);});
+ function weights(i){if(ATT[i])return ATT[i];const g={};if(i>0)g[i-1]=0.4;if(i<WORDS.length-1)g[i+1]=0.4;return g;}
+ function drawArcs(w){
+   const box=svg.getBoundingClientRect();while(svg.firstChild)svg.removeChild(svg.firstChild);
+   if(box.width===0)return;
+   const fc=chips[focus].getBoundingClientRect();
+   const fx=fc.left+fc.width/2-box.left,fy=fc.top-box.top;
+   Object.keys(w).forEach(j=>{
+     const tc=chips[+j].getBoundingClientRect();
+     const tx=tc.left+tc.width/2-box.left,ty=tc.top-box.top,weight=w[j];
+     const midx=(fx+tx)/2,lift=Math.max(8,Math.min(fy,ty)-Math.max(26,Math.abs(tx-fx)*0.30));
+     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+     path.setAttribute('d','M '+fx+' '+fy+' Q '+midx+' '+lift+' '+tx+' '+ty);
+     path.setAttribute('fill','none');path.setAttribute('stroke','#22D3EE');
+     path.setAttribute('stroke-width',(1+weight*5).toFixed(1));
+     path.setAttribute('stroke-opacity',(0.2+weight*0.7).toFixed(2));
+     path.setAttribute('stroke-linecap','round');svg.appendChild(path);
+   });
+ }
+ function render(){const w=weights(focus);
+   chips.forEach((c,j)=>{c.classList.toggle('focus',j===focus);c.classList.toggle('lit',!!w[j]&&j!==focus);});
+   capEl.textContent=CAP[focus]||('See which words "'+WORDS[focus]+'" leans on for meaning.');
+   drawArcs(w);}
+ const isActive=()=>document.getElementById('c-transformer').classList.contains('active');
+ window.__drawAttn=function(){if(isActive())render();};
+ window.addEventListener('resize',()=>{if(isActive())drawArcs(weights(focus));});
+ setTimeout(()=>{if(isActive())render();},150);
+})();
+
+/* transistor switch */
+(function(){
+ const sw=document.getElementById('tswitch'),lab=document.getElementById('tswitchLabel');if(!sw)return;
+ sw.addEventListener('click',()=>{const on=sw.classList.toggle('on');
+   lab.textContent=on?'1 \u00b7 on':'0 \u00b7 off';lab.style.color=on?'var(--good)':'var(--gen)';});
+})();
+/* quiz */
+(function(){
+ const Q=[
+  {q:'Which of these is the broadest umbrella term?',o:['Deep learning','Generative AI','Artificial intelligence','Neural networks'],a:2,e:'Artificial intelligence is the outer ring. Machine learning, deep learning, and generative AI all sit inside it.'},
+  {q:'In machine learning, where do the rules come from?',o:['People write every rule by hand','The computer learns them from examples','They are chosen at random','They are fixed and never change'],a:1,e:'You give the system examples with the right answers, and it works out the rules itself.'},
+  {q:'How does a generative AI model produce a sentence?',o:['It copies a stored sentence','It predicts the next piece, one at a time','It asks a human for each word','It translates from another language'],a:1,e:'It reads everything so far, scores the likely next pieces, adds one, and repeats.'},
+  {q:'What is the Transformer\u2019s key idea?',o:['Bigger screens','Attention, weighing which words matter','Faster typing','Voice control'],a:1,e:'Attention lets each word look at the others and decide which ones help it make sense.'},
+  {q:'Why did the transistor and Moore\u2019s Law matter for AI?',o:['They made computing cheap and abundant','They wrote the first AI program','They invented the internet','They are unrelated to AI'],a:0,e:'Cheap, plentiful compute is the raw material that modern AI runs on.'},
+  {q:'What is a hallucination in AI?',o:['A type of chip','When a model states something false with confidence','A training method','A kind of image'],a:1,e:'Models predict plausible text, and plausible text can still be wrong.'},
+  {q:'For a decision that could deny someone support, the safest role for AI is to:',o:['Decide automatically','Assist while a person decides','Replace the caseworker','Stay hidden from the applicant'],a:1,e:'Keep a human in charge of high-stakes decisions, with a clear route to ask why and to appeal.'},
+  {q:'What makes agentic AI different from a chatbot?',o:['It runs faster','It can take actions and complete multi-step tasks','It uses less electricity','It only works offline'],a:1,e:'An agent plans steps and uses tools to act on a goal. A chatbot answers and then stops.'}
+ ];
+ const total=Q.length;let i=0,score=0,answered=false;
+ const body=document.getElementById('qbody'),count=document.getElementById('qcount'),scoreLine=document.getElementById('qscoreLine'),bar=document.getElementById('qbarFill');
+ if(!body)return;
+ function render(){
+   answered=false;const item=Q[i];
+   count.textContent='Question '+(i+1)+' of '+total;scoreLine.textContent='Score '+score;
+   bar.style.width=(i/total*100)+'%';
+   let html='<div class="qq">'+item.q+'</div><div class="qopts">';
+   item.o.forEach((opt,k)=>{html+='<button class="qopt" data-k="'+k+'">'+opt+'</button>';});
+   html+='</div><div class="qexp" id="qexp"></div>';
+   body.innerHTML=html;
+   body.querySelectorAll('.qopt').forEach(btn=>btn.addEventListener('click',()=>choose(+btn.dataset.k)));
+ }
+ function choose(k){
+   if(answered)return;answered=true;const item=Q[i];
+   const opts=body.querySelectorAll('.qopt');
+   opts.forEach((btn,idx)=>{btn.disabled=true;if(idx===item.a)btn.classList.add('correct');});
+   if(k===item.a)score++;else opts[k].classList.add('wrong');
+   scoreLine.textContent='Score '+score;
+   const exp=document.getElementById('qexp');
+   exp.innerHTML='<b>'+(k===item.a?'Correct. ':'Not quite. ')+'</b>'+item.e;exp.classList.add('show');
+   const next=document.createElement('button');next.className='btn primary';next.style.marginTop='16px';
+   next.textContent=(i<total-1)?'Next question':'See my result';
+   next.addEventListener('click',()=>{if(i<total-1){i++;render();}else{finish();}});
+   body.appendChild(next);
+ }
+ function finish(){
+   bar.style.width='100%';count.textContent='Done';scoreLine.textContent='Score '+score;
+   const msg=score>=7?'Strong. You have the basics well in hand.':score>=5?'Solid start. A quick reread of a tab or two will lock it in.':'Good first pass. Revisit the tabs and try again, it sticks fast.';
+   body.innerHTML='<div class="qresult"><div class="qscore">'+score+' / '+total+'</div><p class="lead" style="margin:0 auto 16px">'+msg+'</p><button class="btn primary" id="qretry">Try again</button></div>';
+   document.getElementById('qretry').addEventListener('click',()=>{i=0;score=0;render();});
+ }
+ render();
+})();
+/* agentic loop + autonomy */
+(function(){
+ const cyc=document.querySelectorAll('#agentFlow [data-cyc]');
+ let idx=0,timer=null;
+ const active=()=>document.getElementById('c-agent').classList.contains('active');
+ function stop(){if(timer){clearInterval(timer);timer=null;}cyc.forEach(b=>b.classList.remove('cyc'));}
+ function step(){if(!active()){stop();return;}cyc.forEach((b,k)=>b.classList.toggle('cyc',k===idx));idx=(idx+1)%cyc.length;}
+ window.__agentLoop=function(){stop();if(!active())return;idx=0;step();timer=setInterval(step,950);};
+ const sel=document.getElementById('autoSel'),desc=document.getElementById('autoDesc');
+ const D={
+  '1':'The agent proposes what to do, and a person carries it out. This is the lowest risk and a good place to start.',
+  '2':'The agent prepares each action and waits for a person to approve it before anything happens. A balance of speed and control.',
+  '3':'The agent completes tasks without asking each time. This is the fastest and the highest risk, suitable only for low-stakes, reversible tasks with close monitoring.'
+ };
+ if(sel){sel.querySelectorAll('.autobtn').forEach(b=>b.addEventListener('click',()=>{
+   sel.querySelectorAll('.autobtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');desc.textContent=D[b.dataset.lvl];}));
+   desc.textContent=D['1'];}
+})();
+/* triad */
+(function(){
+ const D={
+  data:{tag:'Ingredient 1',bg:'rgba(34,211,238,.18)',fg:'#7fe9fb',title:'Data',text:'The examples a model learns from, such as text, records, or images. If the data is thin, biased, or missing some groups, the model carries those flaws forward. In social protection the data is about real people, so accuracy, fairness, and lawful use matter most.'},
+  compute:{tag:'Ingredient 2',bg:'rgba(245,165,36,.18)',fg:'#ffce7a',title:'Compute',text:'The processing power to train and run the model, supplied by specialized chips. Cheap, plentiful compute is what made modern AI possible. There is more on this in the Hardware and Scale tab.'},
+  algo:{tag:'Ingredient 3',bg:'rgba(251,113,133,.2)',fg:'#ffaeba',title:'Algorithms',text:'The methods and model designs that turn data and compute into capability, such as neural networks and the Transformer. This is the recipe that decides how the learning happens.'}
+ };
+ const tag=document.getElementById('triTag'),title=document.getElementById('triTitle'),text=document.getElementById('triText');
+ document.querySelectorAll('.tri-hit').forEach(c=>c.addEventListener('click',()=>{
+   const d=D[c.dataset.k];if(!d)return;tag.textContent=d.tag;tag.style.background=d.bg;tag.style.color=d.fg;title.textContent=d.title;text.textContent=d.text;
+ }));
+})();
+</script>
+</body>
+</html>
